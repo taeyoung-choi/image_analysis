@@ -12,7 +12,11 @@ reasonable to pick K according to the shape of histogram.
 coded and this can be automated using a smarter algorithm.
 
 3. Face Detection: The region has to be big enough to fit the entire face and small enough to exclude background. The
- metric I used 
+ metric I used is the following:
 
 <p align="center">
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\mathrm{number\&space;of\&space;blue\&space;pixels}}{\mathrm{total\&space;number\&space;of\&space;blue\&space;pixels}}\times&space;\frac{\mathrm{number\&space;of\&space;blue\&space;pixels}}{\mathrm{size\&space;of\&space;the\&space;candidate\&space;region}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\mathrm{number\&space;of\&space;blue\&space;pixels}}{\mathrm{total\&space;number\&space;of\&space;blue\&space;pixels}}\times&space;\frac{\mathrm{number\&space;of\&space;blue\&space;pixels}}{\mathrm{size\&space;of\&space;the\&space;candidate\&space;region}}" title="\frac{\mathrm{number\ of\ blue\ pixels}}{\mathrm{total\ number\ of\ blue\ pixels}}\times \frac{\mathrm{number\ of\ blue\ pixels}}{\mathrm{size\ of\ the\ candidate\ region}}" /></a></p>
+
+We'd like to find the best region that includes as many as blue points (face pixels) as possible, but we do not want the entire image either.
+
+4. 
