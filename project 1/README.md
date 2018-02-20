@@ -5,7 +5,7 @@
 
 1. The parameter K was chosen from the histogram. The assumption is that the centroids will converge to the pixel 
 values that appear often. If the number of clusters exceeds the number of peaks in the histogram, then it would make the 
-algorithm unstable, because the extra clusters will appear in different locations each iteration. Thus it was 
+algorithm unstable, because the extra clusters will appear in different locations every time we run the algorithm. Thus it was 
 reasonable to pick K according to the shape of histogram.
 ![histogram](https://github.com/taeyoung-choi/image_analysis/blob/master/data/hist.png)
 
