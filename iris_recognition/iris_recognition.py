@@ -21,6 +21,8 @@ def pupil_detection(img):
     return (col, row, r)
 
 def outer_boundary(img, col, row, r, a, b):
+    img2 = img.copy()
+    cv2.circle(img2,(col,row),r,255,2)
     blurred = cv2.GaussianBlur(img, (7, 7), 0)
     x = int(len(blurred[0])*0.3)
     y = int(len(blurred)*0.3)
@@ -50,16 +52,17 @@ def outer_boundary(img, col, row, r, a, b):
 
     circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT,1,70,param1=20,param2=3,minRadius=30,maxRadius=35)
     circles = np.uint16(np.around(circles/0.3))
-    img2 = img.copy()
+
     for i in circles[0,:]:
-        cv2.circle(img2,(i[0],i[1]),i[2],0,2)
+        cv2.circle(img2,(i[0],i[1]),i[2],255,2)
         plt.imshow(img2, cmap='gray')
         plt.show()
         return (i[0],i[1],i[2])
 
 
 def iris_normalization(img, in_col, in_row, in_r, out_col, out_row, out_r):
-    max_r = int(round(out_r - np.sqrt((in_col-out_col)**2 + (in_row-out_row)**2)))
+    r = int(round(out_r - np.sqrt((in_col-out_col)**2 + (in_row-out_row)**2)))
+    max_r = r - in_r
     M = 64
     N = 512
     normalized = []
@@ -76,7 +79,7 @@ def iris_normalization(img, in_col, in_row, in_r, out_col, out_row, out_r):
     return np.array(normalized)
 
 img = cv2.imread('data/iris/001/1/001_1_1.bmp',0)
-img = cv2.imread('data/iris/014/1/014_1_2.bmp',0)
+img = cv2.imread('data/iris/012/1/012_1_1.bmp',0)
 in_col, in_row, in_r = pupil_detection(img)
 out_col, out_row, out_r = outer_boundary(img, in_col, in_row, in_r, 50, 100)
 normalized = iris_normalization(img, in_col, in_row, in_r, out_col, out_row, out_r)
