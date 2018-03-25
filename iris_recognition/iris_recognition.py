@@ -78,10 +78,51 @@ def iris_normalization(img, in_col, in_row, in_r, out_col, out_row, out_r):
 
     return np.array(normalized)
 
+def illumination_adjust(normalized_img):
+    height, width = normalized_img.shape
+    illumination = []
+    for i in range(4):
+        each_row = []
+        for j in range(32):
+            start_height = i*16
+            end_height = start_height+16
+            start_wid = j*16
+            end_wid = start_wid+16
+            avg = np.mean(normalized_img[start_height:end_height,start_wid:end_wid])
+            each_row.append(round(avg))
+        illumination.append(each_row)
+    illumination = np.array(illumination)
+    return cv2.resize(np.array(illumination), (width, height), cv2.INTER_CUBIC)
+
+def enhencement(img):
+    img2 = img.copy()
+    for i in range(2):
+        for j in range(16):
+            start_height = i*32
+            end_height = start_height+32
+            start_wid = j*32
+            end_wid = start_wid+32
+            grid = img2[start_height:end_height,start_wid:end_wid]
+            img2[start_height:end_height,start_wid:end_wid] = cv2.equalizeHist(grid)
+    return img2
+
 img = cv2.imread('data/iris/001/1/001_1_1.bmp',0)
 img = cv2.imread('data/iris/012/1/012_1_1.bmp',0)
 in_col, in_row, in_r = pupil_detection(img)
 out_col, out_row, out_r = outer_boundary(img, in_col, in_row, in_r, 50, 100)
 normalized = iris_normalization(img, in_col, in_row, in_r, out_col, out_row, out_r)
 plt.imshow(normalized, cmap='gray')
+plt.show()
+
+illumination = illumination_adjust(normalized)
+illum_adjusted = np.array(normalized-np.round(illumination))
+plt.imshow(illum_adjusted, cmap='gray')
+plt.show()
+
+illum_adjusted = (illum_adjusted - np.min(illum_adjusted)).astype(np.uint8)
+plt.imshow(illum_adjusted, cmap='gray')
+plt.show()
+
+enhenced = enhencement(illum_adjusted)
+plt.imshow(enhenced, cmap='gray')
 plt.show()
