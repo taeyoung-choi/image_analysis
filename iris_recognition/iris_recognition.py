@@ -106,6 +106,31 @@ def enhencement(img):
             img2[start_height:end_height,start_wid:end_wid] = cv2.equalizeHist(grid)
     return img2
 
+def spatial_filter(x,y,delta_x,delta_y,f):
+    modul_fun = np.cos(2*np.pi*f*np.hypot(x,y))
+    gaus_envelop = (x**2)/(delta_x**2)+(y**2)/(delta_y**2)
+    filter = 1/(2*np.pi*delta_x*delta_y)*np.exp(-0.5*(gaus_envelop))*modul_fun
+
+    return filter
+
+def to_feature_vec(img, block_size=8):
+    roi = img[:48,:]
+    len, wid = roi.size/block_size
+    vec_size = len*wid*4
+    feature_vec = np.empty((0,vec_size))
+    for i in range(len):
+        for j in range(wid):
+            start_height = i*block_size
+            end_height = start_height+block_size
+            start_wid = j*block_size
+            end_wid = start_wid+block_size
+            block1=[]
+            block2=[]
+            for m in range(start_height, end_height):
+                for n in range(start_wid, end_wid):
+                    block1.append(roi[m,n]*spatial_filter)
+    
+
 img = cv2.imread('data/iris/001/1/001_1_1.bmp',0)
 img = cv2.imread('data/iris/012/1/012_1_1.bmp',0)
 in_col, in_row, in_r = pupil_detection(img)
