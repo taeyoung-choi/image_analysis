@@ -129,7 +129,7 @@ def to_feature_vec(img, block_size=8):
             for m in range(start_height, end_height):
                 for n in range(start_wid, end_wid):
                     block1.append(roi[m,n]*spatial_filter)
-    
+
 
 img = cv2.imread('data/iris/001/1/001_1_1.bmp',0)
 img = cv2.imread('data/iris/012/1/012_1_1.bmp',0)
