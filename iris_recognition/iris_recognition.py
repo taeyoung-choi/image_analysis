@@ -1,14 +1,23 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+import numpy.linalg as la
 
 def pupil_detection(img):
-    plt.imshow(img, cmap='gray')
-    plt.show()
+    # plt.imshow(img, cmap='gray')
+    # plt.show()
     col = np.argmin(np.sum(img, axis=0))
     row = np.argmin(np.sum(img, axis=1))
     pupil_pix = img[row,col]
-    (thresh, im_bw) = cv2.threshold(img, pupil_pix, 255, cv2.THRESH_BINARY)
+    # print(pupil_pix)
+    (thresh, im_bw) = cv2.threshold(img, 75, 255, cv2.THRESH_BINARY)
+    # plt.imshow(im_bw, cmap='gray')
+    # plt.show()
+    kernel = np.ones((15,15),np.uint8)
+    im_bw = cv2.morphologyEx(im_bw, cv2.MORPH_CLOSE, kernel)
+
+    # plt.imshow(im_bw, cmap='gray')
+    # plt.show()
 
     length = np.array(range(len(im_bw)))
     width = np.array(range(len(im_bw[0])))
@@ -21,47 +30,80 @@ def pupil_detection(img):
     return (col, row, r)
 
 def outer_boundary(img, col, row, r, a, b):
-    img2 = img.copy()
-    cv2.circle(img2,(col,row),r,255,2)
+    # print(col,row)
+    # img2 = img.copy()
+    # cv2.circle(img2,(col,row),r,255,2)
+
     blurred = cv2.GaussianBlur(img, (7, 7), 0)
-    x = int(len(blurred[0])*0.3)
-    y = int(len(blurred)*0.3)
+    x = int(round(len(blurred[0])*0.3))
+    y = int(round(len(blurred)*0.3))
     resized_image = cv2.resize(blurred, (x, y))
     edges = cv2.Canny(resized_image, a, b)
+    # plt.imshow(edges, cmap='gray')
+    # plt.show()
+    r = int(round(r*0.3))
+    col, row = int(round(col*0.3)), int(round(row*0.3))
 
-    r = int(r*0.3)
-    col, row = int(col*0.3), int(row*0.3)
-    edges[row-r-8:row+r+8, col-r-13:col+r+13] = 0
+    n, m = edges.shape
+    r1 = r + 12
+    y1,x1 = np.ogrid[-row:n-row, -col:m-col]
+    mask = x1*x1 + y1*y1 <= r1*r1
+    edges[mask] = 0
 
-    lower_removal = edges[row+r+4:, col]
-    l_bound = np.argmax(lower_removal==255)+row+r+4
-    upper_removal = edges[row-r-4:, col]
-    u_bound = row-r-4+np.argmin(upper_removal==255)
+    # plt.imshow(edges, cmap='gray')
+    # plt.show()
+    lower_removal = edges[row+r+8:, col]
+    l_bound = np.argmax(lower_removal==255)+row+r+8
+    upper_removal = edges[row-r-8:, col]
+    u_bound = row-r-8+np.argmin(upper_removal==255)
     edges[:u_bound,] = 0
     edges[l_bound:,] = 0
-
+    # plt.imshow(edges, cmap='gray')
+    # plt.show()
     left = edges[row, :col][::-1]
     right = edges[row, col:]
-
     left = np.argmax(left == 255)
     right = np.argmax(right == 255)
+
     if left != 0:
-        edges[:,:(col-left-2)] = 0
-    if right != 0:
+        if col-left-2 > 15:
+            edges[:,:(col-left-2)] = 0
+        else:
+            edges[:,:20] = 0
+
+    else:
+        edges[:,:20] = 0
+    if (x-(col+right+2)) > 15 and right != 0:
         edges[:,(col+right+2):] = 0
+    else:
+        edges[:,90:] = 0
 
+    # plt.imshow(edges, cmap='gray')
+    # plt.show()
     circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT,1,70,param1=20,param2=3,minRadius=30,maxRadius=35)
-    circles = np.uint16(np.around(circles/0.3))
+    if circles is not None:
+        circles = np.uint16(np.around(circles/0.3))
 
-    for i in circles[0,:]:
-        cv2.circle(img2,(i[0],i[1]),i[2],255,2)
-        plt.imshow(img2, cmap='gray')
-        plt.show()
-        return (i[0],i[1],i[2])
+        for i in circles[0,:]:
+            # cv2.circle(img2,(i[0],i[1]),i[2],255,2)
+            # plt.imshow(img2, cmap='gray')
+            # plt.show()
+            return (i[0],i[1],i[2])
+    else:
+        col = int(round(col/0.3))
+        row = int(round(row/0.3))
+        r = int(round(r/0.3)) + 60
+        # cv2.circle(img2,(col,row),r,255,2)
+        # plt.imshow(img2, cmap='gray')
+        # plt.show()
+        return (col,row,r)
 
 
 def iris_normalization(img, in_col, in_row, in_r, out_col, out_row, out_r):
-    r = int(round(out_r - np.sqrt((in_col-out_col)**2 + (in_row-out_row)**2)))
+    r = int(round(out_r - np.hypot(in_col-out_col, in_row-out_row)))
+    maxh, maxw = img.shape
+    r2 = min(in_col, in_row, maxh-in_row, maxw-in_col)
+    r = min(r, r2)
     max_r = r - in_r
     M = 64
     N = 512
@@ -113,41 +155,182 @@ def spatial_filter(x,y,delta_x,delta_y,f):
 
     return filter
 
-def to_feature_vec(img, block_size=8):
-    roi = img[:48,:]
-    len, wid = roi.size/block_size
-    vec_size = len*wid*4
-    feature_vec = np.empty((0,vec_size))
+def to_feature_vec(image, block_size=7):
+    roi = np.array(image[:49,:511])
+    (len, wid) = roi.shape
+    vec_size = int((len*wid*4)/(block_size**2))
+    channel1 = np.empty((49,wid))
+    channel2 = np.empty((49,wid))
+    each_side = int((block_size-1)/2)
+    feature_vec = []
     for i in range(len):
         for j in range(wid):
+            each_pix1 = 0
+            each_pix2 = 0
+            for m in range(i-each_side, i+each_side+1):
+                for n in range(j-each_side, j+each_side+1):
+                    if (m > 0 and m < len) and (n > 0 and n < wid):
+                        each_pix1 += roi[m, n]*spatial_filter(i-m, j-n, 3, 1.5, 1/1.5)
+                        each_pix2 += roi[m, n]*spatial_filter(i-m, j-n, 4.5, 1.5, 1/1.5)
+            channel1[i,j] = each_pix1
+            channel2[i,j] = each_pix2
+
+    for i in range(int(len/block_size)):
+        for j in range(int(wid/block_size)):
             start_height = i*block_size
             end_height = start_height+block_size
             start_wid = j*block_size
             end_wid = start_wid+block_size
-            block1=[]
-            block2=[]
-            for m in range(start_height, end_height):
-                for n in range(start_wid, end_wid):
-                    block1.append(roi[m,n]*spatial_filter)
+            grid1 = channel1[start_height:end_height, start_wid:end_wid]
+            grid2 = channel2[start_height:end_height, start_wid:end_wid]
+
+            absolute = np.absolute(grid1)
+            mean = np.mean(absolute)
+            feature_vec.append(mean)
+            std = np.mean(np.absolute(absolute-mean))
+            feature_vec.append(std)
+
+            absolute = np.absolute(grid2)
+            mean = np.mean(absolute)
+            feature_vec.append(mean)
+            std = np.mean(np.absolute(absolute-mean))
+            feature_vec.append(std)
+
+    return feature_vec
 
 
-img = cv2.imread('data/iris/001/1/001_1_1.bmp',0)
-img = cv2.imread('data/iris/012/1/012_1_1.bmp',0)
+def get_train_feature():
+    x_train = []
+    y_train = []
+    for i in range(1,40):
+        print(i)
+        for j in range(1,4):
+            eye_num = str(i).zfill(3)
+            path = 'data/iris/{}/1/{}_1_{}.bmp'.format(eye_num,eye_num,j)
+            img = cv2.imread(path,0)
+            in_col, in_row, in_r = pupil_detection(img)
+            out_col, out_row, out_r = outer_boundary(img, in_col, in_row, in_r, 50, 100)
+            normalized = iris_normalization(img, in_col, in_row, in_r, out_col, out_row, out_r)
+    #         illumination = illumination_adjust(normalized)
+    #         illum_adjusted = np.array(normalized-np.round(illumination))
+    #         illum_adjusted = (illum_adjusted - np.min(illum_adjusted)).astype(np.uint8)
+            enhenced = enhencement(normalized)
+            # plt.imshow(enhenced, cmap='gray')
+            # plt.show()
+            feature = to_feature_vec(enhenced)
+            x_train.append(feature)
+            y_train.append(i)
+    #
+    # np.savetxt('train_feature.csv', x_train, delimiter=',')
+    # np.savetxt('train_label.csv', y_train, delimiter=',')
+
+    return x_train, y_train
+
+def get_test_feature():
+    x_test = []
+    y_test = []
+    for i in range(1,40):
+        print(i)
+        for j in range(1,5):
+            eye_num = str(i).zfill(3)
+            path = 'data/iris/{}/2/{}_2_{}.bmp'.format(eye_num,eye_num,j)
+            img = cv2.imread(path,0)
+            in_col, in_row, in_r = pupil_detection(img)
+            out_col, out_row, out_r = outer_boundary(img, in_col, in_row, in_r, 50, 100)
+            normalized = iris_normalization(img, in_col, in_row, in_r, out_col, out_row, out_r)
+            # illumination = illumination_adjust(normalized)
+            # illum_adjusted = np.array(normalized-np.round(illumination))
+            # illum_adjusted = (illum_adjusted - np.min(illum_adjusted)).astype(np.uint8)
+            enhenced = enhencement(normalized)
+            # plt.imshow(enhenced, cmap='gray')
+            # plt.show()
+            feature = to_feature_vec(enhenced)
+            x_test.append(feature)
+            y_test.append(i)
+    #
+    # np.savetxt('test_feature.csv', x_test, delimiter=',')
+    # np.savetxt('test_label.csv', y_test, delimiter=',')
+    return x_test, y_test
+
+def projection_matrix(x_train, n=200):
+    training_mean = np.mean(np.array(x_train), axis=0)
+    training_mean.shape = (2044,1)
+
+    between_class = np.zeros((2044,2044))
+    within_class = np.zeros((2044,2044))
+    for i in range(39):
+        each_class = np.array(x_train)[3*i:3*i+3, ]
+        class_mean = np.mean(each_class, axis=0)
+        class_mean.shape = (2044,1)
+        diff = class_mean - training_mean
+        between_class += diff.dot(diff.transpose())
+        for j in range(3):
+            each_row = each_class[j,]
+            each_row.shape = (2044,1)
+            diff2 = each_row - class_mean
+            within_class += diff2.dot(diff2.transpose())
+
+    eigen_vals, eigen_vecs = np.linalg.eigh(np.linalg.inv(within_class).dot(between_class))
+    idx = eigen_vals.argsort()[::-1]
+    eigen_vecs = eigen_vecs[:,idx]
+    return eigen_vecs[:,:n]
+
+x_train, y_train =get_train_feature()
+np.array(x_train).shape
+
+x_test, y_test =get_test_feature()
+
+x_train = np.genfromtxt('train_feature.csv', delimiter=',')
+y_train = np.genfromtxt('train_label.csv', delimiter=',')
+x_test = np.genfromtxt('test_feature.csv', delimiter=',')
+y_test = np.genfromtxt('test_label.csv', delimiter=',')
+
+d = 355
+x_train = np.array(x_train)
+proj_mat = projection_matrix(x_train, n=d)
+x_train.shape
+proj_mat.shape
+train_reduced = np.matmul(x_train,proj_mat)
+train_reduced.shape
+
+x_test = np.array(x_test)
+test_reduced = np.matmul(x_test,proj_mat)
+test_reduced.shape
+
+# from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+#
+# lda = LDA()
+# lda.fit(x_train, y_train)
+# x_train.shape
+# train_reduced = lda.transform(x_train)
+# test_reduced = lda.transform(x_test)
+# lda.coef_.shape
+
+train_reduced.shape
+test_reduced.shape
+
+y_predicted = []
+for j in range(156):
+    opt = 99999
+    for i in range(117):
+        # val = np.sum(np.abs(train_reduced[i,:] - test_reduced[j,:]))
+        # val = np.sum(np.power(train_reduced[i,:] - test_reduced[j,:], 2))
+        train = train_reduced[i,:]
+        test = test_reduced[j,:]
+        train.shape = (d,1)
+        test.shape = (1,d)
+        val = 1 - test.dot(train)/(la.norm(train)*la.norm(test))
+        if val < opt:
+            opt = val
+            inx = y_train[i]
+    y_predicted.append(inx)
+np.array(y_test).shape
+np.array(y_predicted).shape
+
+np.mean(np.array(y_test) == np.array(y_predicted))
+
+
+path = 'data/iris/037/2/037_2_4.bmp'
+img = cv2.imread(path,0)
 in_col, in_row, in_r = pupil_detection(img)
 out_col, out_row, out_r = outer_boundary(img, in_col, in_row, in_r, 50, 100)
-normalized = iris_normalization(img, in_col, in_row, in_r, out_col, out_row, out_r)
-plt.imshow(normalized, cmap='gray')
-plt.show()
-
-illumination = illumination_adjust(normalized)
-illum_adjusted = np.array(normalized-np.round(illumination))
-plt.imshow(illum_adjusted, cmap='gray')
-plt.show()
-
-illum_adjusted = (illum_adjusted - np.min(illum_adjusted)).astype(np.uint8)
-plt.imshow(illum_adjusted, cmap='gray')
-plt.show()
-
-enhenced = enhencement(illum_adjusted)
-plt.imshow(enhenced, cmap='gray')
-plt.show()
