@@ -333,5 +333,9 @@ x = []
 for i in range(5,400,5):
     x.append(i)
 
+np.savetxt('distance1.csv', accuracy_1, delimiter=',')
+np.savetxt('distance2.csv', accuracy_2, delimiter=',')
+np.savetxt('distance3.csv', accuracy_3, delimiter=',')
+
 plt.plot(x,accuracy_1,x,accuracy_2,x,accuracy_3)
 plt.show()
