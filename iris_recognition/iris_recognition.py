@@ -202,7 +202,7 @@ def to_feature_vec(image, block_size=7):
 def get_train_feature():
     x_train = []
     y_train = []
-    for i in range(1,40):
+    for i in range(1,109):
         print(i)
         for j in range(1,4):
             eye_num = str(i).zfill(3)
@@ -221,15 +221,15 @@ def get_train_feature():
             x_train.append(feature)
             y_train.append(i)
     #
-    # np.savetxt('train_feature.csv', x_train, delimiter=',')
-    # np.savetxt('train_label.csv', y_train, delimiter=',')
+    np.savetxt('train_feature.csv', x_train, delimiter=',')
+    np.savetxt('train_label.csv', y_train, delimiter=',')
 
     return x_train, y_train
 
 def get_test_feature():
     x_test = []
     y_test = []
-    for i in range(1,40):
+    for i in range(1,109):
         print(i)
         for j in range(1,5):
             eye_num = str(i).zfill(3)
@@ -248,17 +248,17 @@ def get_test_feature():
             x_test.append(feature)
             y_test.append(i)
     #
-    # np.savetxt('test_feature.csv', x_test, delimiter=',')
-    # np.savetxt('test_label.csv', y_test, delimiter=',')
+    np.savetxt('test_feature.csv', x_test, delimiter=',')
+    np.savetxt('test_label.csv', y_test, delimiter=',')
     return x_test, y_test
 
-def projection_matrix(x_train, n=200):
+def projection_matrix(x_train):
     training_mean = np.mean(np.array(x_train), axis=0)
     training_mean.shape = (2044,1)
 
     between_class = np.zeros((2044,2044))
     within_class = np.zeros((2044,2044))
-    for i in range(39):
+    for i in range(108):
         each_class = np.array(x_train)[3*i:3*i+3, ]
         class_mean = np.mean(each_class, axis=0)
         class_mean.shape = (2044,1)
@@ -273,64 +273,65 @@ def projection_matrix(x_train, n=200):
     eigen_vals, eigen_vecs = np.linalg.eigh(np.linalg.inv(within_class).dot(between_class))
     idx = eigen_vals.argsort()[::-1]
     eigen_vecs = eigen_vecs[:,idx]
-    return eigen_vecs[:,:n]
+    return eigen_vecs
 
-x_train, y_train =get_train_feature()
-np.array(x_train).shape
 
-x_test, y_test =get_test_feature()
+# def main():
+    x_train, y_train =get_train_feature()
+    x_test, y_test =get_test_feature()
 
 x_train = np.genfromtxt('train_feature.csv', delimiter=',')
 y_train = np.genfromtxt('train_label.csv', delimiter=',')
 x_test = np.genfromtxt('test_feature.csv', delimiter=',')
 y_test = np.genfromtxt('test_label.csv', delimiter=',')
 
-d = 355
-x_train = np.array(x_train)
-proj_mat = projection_matrix(x_train, n=d)
 x_train.shape
-proj_mat.shape
-train_reduced = np.matmul(x_train,proj_mat)
-train_reduced.shape
 
+accuracy_1 = []
+accuracy_2 = []
+accuracy_3 = []
+eigen_vecs = projection_matrix(x_train)
+x_train = np.array(x_train)
 x_test = np.array(x_test)
-test_reduced = np.matmul(x_test,proj_mat)
-test_reduced.shape
+for k in range(5,400,5):
+    proj_mat = eigen_vecs[:,:k]
+    train_reduced = np.matmul(x_train,proj_mat)
+    test_reduced = np.matmul(x_test,proj_mat)
 
-# from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-#
-# lda = LDA()
-# lda.fit(x_train, y_train)
-# x_train.shape
-# train_reduced = lda.transform(x_train)
-# test_reduced = lda.transform(x_test)
-# lda.coef_.shape
+    y_predicted_1 = []
+    y_predicted_2 = []
+    y_predicted_3 = []
+    for j in range(432):
+        opt1 = 99999
+        opt2 = 99999
+        opt3 = 99999
+        for i in range(324):
+            val1 = np.sum(np.abs(train_reduced[i,:] - test_reduced[j,:]))
+            val2 = np.sum(np.power(train_reduced[i,:] - test_reduced[j,:], 2))
+            train = train_reduced[i,:]
+            test = test_reduced[j,:]
+            train.shape = (k,1)
+            test.shape = (1,k)
+            val3 = 1 - test.dot(train)/(la.norm(train)*la.norm(test))
+            if val1 < opt1:
+                opt1 = val1
+                inx1 = y_train[i]
+            if val2 < opt2:
+                opt2 = val2
+                inx2 = y_train[i]
+            if val3 < opt3:
+                opt3 = val3
+                inx3 = y_train[i]
+        y_predicted_1.append(inx1)
+        y_predicted_2.append(inx2)
+        y_predicted_3.append(inx3)
+    accuracy_1.append(np.mean(np.array(y_test) == np.array(y_predicted_1)))
+    accuracy_2.append(np.mean(np.array(y_test) == np.array(y_predicted_2)))
+    accuracy_3.append(np.mean(np.array(y_test) == np.array(y_predicted_3)))
 
-train_reduced.shape
-test_reduced.shape
+x = []
+for i in range(5,400,5):
+    x.append(i)
 
-y_predicted = []
-for j in range(156):
-    opt = 99999
-    for i in range(117):
-        # val = np.sum(np.abs(train_reduced[i,:] - test_reduced[j,:]))
-        # val = np.sum(np.power(train_reduced[i,:] - test_reduced[j,:], 2))
-        train = train_reduced[i,:]
-        test = test_reduced[j,:]
-        train.shape = (d,1)
-        test.shape = (1,d)
-        val = 1 - test.dot(train)/(la.norm(train)*la.norm(test))
-        if val < opt:
-            opt = val
-            inx = y_train[i]
-    y_predicted.append(inx)
-np.array(y_test).shape
-np.array(y_predicted).shape
-
-np.mean(np.array(y_test) == np.array(y_predicted))
-
-
-path = 'data/iris/037/2/037_2_4.bmp'
-img = cv2.imread(path,0)
-in_col, in_row, in_r = pupil_detection(img)
-out_col, out_row, out_r = outer_boundary(img, in_col, in_row, in_r, 50, 100)
+plt.plot(x,accuracy_1,x,accuracy_2,x,accuracy_3)
+plt.show()
