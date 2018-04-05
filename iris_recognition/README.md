@@ -58,20 +58,21 @@ Fit Sklearn LinearDiscriminantAnalysis on the feature vectors. In order to use t
 ### PerformanceEvaluation.py
 Performance is evaluated by three different distance measures and dimensionality reduction in LDA. Three metrics are L<sub>1, L<sub>2 and Cosine Similarity. It checks all the metrics over all possible dimensionality reduction domain.
 
-![Sample Service2](fmr.png)
+![Sample Service2](temp.png)
 
-False Match and False Nonmatch Rates with Different Threshold Values
-
+Recognition Results Using Different Similarity Measures
 
 | Similarity| Dimension 40 | Dimension 60 | Dimension 80 | Dimension 100 |
 | :---: | :---: | :---: | :---: | :---: |
 | L<sub>1 | 0.48 | 0.50 | 0.48| 0.46 |
 | L<sub>2 | 0.51  | 0.54| 0.52 | 0.51 | 
-| Cosin | 0.65 | 0.69 |0.71| 0.72 |
+| Cosine | 0.65 | 0.69 |0.71| 0.72 |
     
-![Sample Service2](temp.png)
+![Sample Service2](fmr.png)
 
-Recognition Results Using Different Similarity Measures
+LDA can calculate the probability of each point being associated with each class. Instead of picking the class with the highest probability, it rejects the matching if the probability is lower than the threshold. Then it calculates False match rate and False non-match rate.
+
+False Match and False Nonmatch Rates with Different Threshold Values
 
 | | False match rate | False non-match rate|
 | :---: | :---: | :---: | 
@@ -79,3 +80,5 @@ Recognition Results Using Different Similarity Measures
 | 0.5 | 0.26  | 0.03  |
 | 0.7 | 0.23  | 0.09  |
 | 0.8 | 0.21  | 0.13  |
+
+The best performing distance metric is Cosine Similarity with the 0.72 recognition rate. I can improve the desing by more accurately capturing iris area. I noticed that there are many iris images that contains significant amount of eyelids. The paper only uses upper 48 pixels, but even doing so cannot remove eyelids for my localization algorithm. I should test with different dimensions of nomalization images, in order to improve the recognition rate.
