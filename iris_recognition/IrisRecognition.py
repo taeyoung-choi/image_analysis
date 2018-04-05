@@ -51,8 +51,12 @@ def get_test_feature():
 
 
 def main():
-    x_train, y_train = get_train_feature()
-    x_test, y_test = get_test_feature()
+    # x_train, y_train = get_train_feature()
+    # x_test, y_test = get_test_feature()
+    x_test = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image Analysis/iris_recognition/test_feature.csv',delimiter=',')
+    y_test = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image Analysis/iris_recognition/test_label.csv',delimiter=',')
+    x_train = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image Analysis/iris_recognition/train_feature.csv',delimiter=',')
+    y_train = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image Analysis/iris_recognition/train_label.csv',delimiter=',')
     PerformanceEvaluation.rec_rate_by_dimesion(x_train, y_train, x_test, y_test)
     PerformanceEvaluation.fmr(x_train, y_train, x_test, y_test)
 

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 def pupil_detection(img):
     (thresh, im_bw) = cv2.threshold(img, 75, 255, cv2.THRESH_BINARY)
 
