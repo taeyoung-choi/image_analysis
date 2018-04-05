@@ -49,12 +49,33 @@ It divides the normalized image into 16 by 16 grids and equalizes the histogram 
 #### spatial_filter
 Implementing the spatial filter defined in the paper.
 
-### to_feature_vec
+#### to_feature_vec
 It uses 7 by 7 region. So that all the pixels are equally distributed from a given point. Therefore, it uses the subset of image of the size 49 by 511. As a result, each feature vector has the dimension of 2,044 (7*73*4). 
 
 ### IrisMatching.py
 Fit Sklearn LinearDiscriminantAnalysis on the feature vectors. In order to use the distance metrics provided in the paper, it transforms the feature vector into the appropriate dimension, then predicts the result.
 
+### PerformanceEvaluation.py
+Performance is evaluated by three different distance measures and dimensionality reduction in LDA. Three metrics are L<sub>1, L<sub>2 and Cosine Similarity. It checks all the metrics over all possible dimensionality reduction domain.
 
 ![Sample Service2](fmr.png)
+
+False Match and False Nonmatch Rates with Different Threshold Values
+
+
+| Similarity| Dimension 40 | Dimension 60 | Dimension 80 | Dimension 100 |
+| :---: | :---: | :---: | :---: | :---: |
+| L<sub>1 | 0.48 | 0.50 | 0.48| 0.46 |
+| L<sub>2 | 0.51  | 0.54| 0.52 | 0.51 | 
+| Cosin | 0.65 | 0.69 |0.71| 0.72 |
+    
 ![Sample Service2](temp.png)
+
+Recognition Results Using Different Similarity Measures
+
+| | False match rate | False non-match rate|
+| :---: | :---: | :---: | 
+| 0.4 | 0.27 | 0.01  |
+| 0.5 | 0.26  | 0.03  |
+| 0.7 | 0.23  | 0.09  |
+| 0.8 | 0.21  | 0.13  |
