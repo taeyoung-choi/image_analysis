@@ -56,3 +56,5 @@ It uses 7 by 7 region. So that all the pixels are equally distributed from a giv
 Fit Sklearn LinearDiscriminantAnalysis on the feature vectors. In order to use the distance metrics provided in the paper, it transforms the feature vector into the appropriate dimension, then predicts the result.
 
 
+![Sample Service2](fmr.png)
+![Sample Service2](temp.png)
