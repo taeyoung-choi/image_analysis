@@ -225,7 +225,7 @@ Fit Sklearn LinearDiscriminantAnalysis on the feature vectors. In order to use t
 ### PerformanceEvaluation.py
 Performance is evaluated by three different distance measures and dimensionality reduction in LDA. Three metrics are L<sub>1, L<sub>2 and Cosine Similarity. It checks all the metrics over all possible dimensionality reduction domain.
 
-![Sample Service2](temp.png)
+![Sample Service2](plot/acc.png)
 
 Recognition Results Using Different Similarity Measures
 
@@ -235,7 +235,7 @@ Recognition Results Using Different Similarity Measures
 | L<sub>2 | 0.51  | 0.54| 0.52 | 0.51 | 
 | Cosine | 0.65 | 0.69 |0.71| 0.72 |
     
-![Sample Service2](fmr.png)
+![Sample Service2](plot/fmr.png)
 
 LDA can calculate the probability of each point being associated with each class. Instead of picking the class with the highest probability, it rejects the matching if the probability is lower than the threshold. Then it calculates False match rate and False non-match rate.
 
