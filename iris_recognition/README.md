@@ -133,13 +133,13 @@ It calculates the closest distance from the center to all image boundaries. Afte
 Since IrisLocalization is not perfect, we often find the outer boundary including the area outside the iris. In order to remove that noise, we draw another circle centered at the pupil center with the radius that we computed ealier. Then it normalizes the iris area to a rectangular image of size 64 by 512.
 
 ### ImageEnhancement.py
-It divides the normalized image into 16 by 16 grids and equalizes the histogram of each grid.
+It divides the normalized image into 32 by 32 grids and equalizes the histogram of each grid.
 ```python
 # do not change the original image
 img2 = img.copy()
-size = 16
-for i in range(4):
-    for j in range(32):
+size = 32
+for i in range(2):
+    for j in range(16):
         # Define each 16 by 16 grid iteratively
         start_height = i*size
         end_height = start_height+size
