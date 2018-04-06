@@ -315,3 +315,6 @@ The best performing distance metric is Cosine Similarity with the 0.72 recogniti
   <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/enhanced.png">
 </p>
 
+### Reference
+* Ma et al., Personal Identification Based on Iris Texture Analysis, IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE, VOL. 25, NO. 12, DECEMBER 2003
+* CASIA Iris Image Database Version 1.0 - Biometrics Ideal Test
