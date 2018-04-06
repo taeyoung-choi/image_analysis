@@ -3,11 +3,11 @@ import numpy as np
 from iris_recognition import IrisLocalization, IrisNormalization, ImageEnhancement, FeatureExtraction, PerformanceEvaluation
 
 
-def raw_img_process(img):
+def raw_img_process(img, d):
     pupil, outer = IrisLocalization.run(img)
     normalized = IrisNormalization.run(img, pupil, outer)
     enhenced = ImageEnhancement.run(normalized)
-    feature = FeatureExtraction.run(enhenced)
+    feature = FeatureExtraction.run(enhenced, d)
 
     return feature
 
@@ -16,7 +16,7 @@ def get_train_feature():
     x_train = []
     y_train = []
     for i in range(1, 109):
-        print(i)
+        # print(i)
         for j in range(1, 4):
             eye_num = str(i).zfill(3)
             path = '/Users/taeyoungchoi/Documents/Spring 2018/Image Analysis/data/iris/{}/1/{}_1_{}.bmp'.format(
@@ -35,7 +35,7 @@ def get_test_feature():
     x_test = []
     y_test = []
     for i in range(1, 109):
-        print(i)
+        # print(i)
         for j in range(1, 5):
             eye_num = str(i).zfill(3)
             path = '/Users/taeyoungchoi/Documents/Spring 2018/Image Analysis/data/iris/{}/2/{}_2_{}.bmp'.format(
@@ -51,16 +51,16 @@ def get_test_feature():
 
 
 def main():
-    x_train, y_train = get_train_feature()
-    x_test, y_test = get_test_feature()
-    # x_test = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
-    #                     'Analysis/iris_recognition/csv/test_feature.csv', delimiter=',')
-    # y_test = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
-    #                     'Analysis/iris_recognition/csv/test_label.csv', delimiter=',')
-    # x_train = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
-    #                      'Analysis/iris_recognition/csv/train_feature.csv', delimiter=',')
-    # y_train = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
-    #                      'Analysis/iris_recognition/csv/train_label.csv', delimiter=',')
+    # x_train, y_train = get_train_feature()
+    # x_test, y_test = get_test_feature()
+    x_test = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
+                        'Analysis/iris_recognition/csv/test_feature42.csv', delimiter=',')
+    y_test = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
+                        'Analysis/iris_recognition/csv/test_label42.csv', delimiter=',')
+    x_train = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
+                         'Analysis/iris_recognition/csv/train_feature42.csv', delimiter=',')
+    y_train = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
+                         'Analysis/iris_recognition/csv/train_label42.csv', delimiter=',')
     PerformanceEvaluation.rec_rate_by_dimesion(x_train, y_train, x_test, y_test)
     PerformanceEvaluation.fmr(x_train, y_train, x_test, y_test)
 

@@ -47,14 +47,15 @@ def rec_rate_by_dimesion(x_train, y_train, x_test, y_test):
         accuracy_1.append(np.mean(np.array(y_test) == np.array(y_predicted_1)))
         accuracy_2.append(np.mean(np.array(y_test) == np.array(y_predicted_2)))
         accuracy_3.append(np.mean(np.array(y_test) == np.array(y_predicted_3)))
-    #cosine 0.715
+    #cosine 0.724
     np.savetxt('csv/distance1.csv', accuracy_1, delimiter=',')
     np.savetxt('csv/distance2.csv', accuracy_2, delimiter=',')
     np.savetxt('csv/distance3.csv', accuracy_3, delimiter=',')
-
+    print(accuracy_1)
+    print(accuracy_2)
+    print(accuracy_3)
     plt.plot(x, accuracy_1, x, accuracy_2, x, accuracy_3)
     plt.legend(['L1', 'L2', 'Cosine'])
-    plt.savefig('acc.png')
     plt.close()
 
 
@@ -81,5 +82,4 @@ def fmr(x_train, y_train, x_test, y_test):
     plt.title("False Match and False Non-match Rates")
     plt.xlabel("False Match Rate")
     plt.ylabel("False Non-match Rate")
-    plt.savefig("fmr.png")
     plt.close()

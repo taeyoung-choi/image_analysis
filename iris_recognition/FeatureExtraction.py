@@ -79,5 +79,5 @@ def to_feature_vec(image, block_size=7):
     return feature_vec
 
 
-def run(img):
-    return to_feature_vec(img)
+def run(img, d):
+    return to_feature_vec(img, d)
