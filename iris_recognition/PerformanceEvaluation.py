@@ -10,7 +10,7 @@ def rec_rate_by_dimesion(x_train, y_train, x_test, y_test):
     accuracy_2 = []
     accuracy_3 = []
     x = []
-    for k in range(40, 108, 20):
+    for k in range(1, 108, 20):
         lda = LinearDiscriminantAnalysis(n_components=k)
         lda.fit(x_train, y_train)
         x.append(k)
@@ -52,10 +52,9 @@ def rec_rate_by_dimesion(x_train, y_train, x_test, y_test):
     np.savetxt('csv/distance2.csv', accuracy_2, delimiter=',')
     np.savetxt('csv/distance3.csv', accuracy_3, delimiter=',')
 
-    print(accuracy_1, accuracy_2, accuracy_3)
     plt.plot(x, accuracy_1, x, accuracy_2, x, accuracy_3)
     plt.legend(['L1', 'L2', 'Cosine'])
-    plt.savefig('plot/acc.png')
+    plt.savefig('acc.png')
     plt.close()
 
 
@@ -78,11 +77,9 @@ def fmr(x_train, y_train, x_test, y_test):
         false_non_match.append(np.mean(thresh == 0))
         false_match.append(np.mean(y_test[thresh != 0] != thresh[thresh != 0]))
 
-    print(false_match)
-    print(false_non_match)
     plt.plot(false_match, false_non_match)
     plt.title("False Match and False Non-match Rates")
     plt.xlabel("False Match Rate")
     plt.ylabel("False Non-match Rate")
-    plt.savefig("plot/fmr.png")
+    plt.savefig("fmr.png")
     plt.close()

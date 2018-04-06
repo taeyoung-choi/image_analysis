@@ -4,11 +4,25 @@ import numpy as np
 import math
 
 
-def run(x_train, y_train, x_test):
-    lda = LinearDiscriminantAnalysis()
+def run(x_train, y_train, x_test, n=107):
+    """
+    Fit Sklearn LinearDiscriminantAnalysis on the feature vectors. Then transforms the feature vector into the
+    appropriate dimension, then predicts the result using three different similarity metrics.
+
+    :param x_train: training feature vectors
+    :param y_train: training labels
+    :param x_test: test feature vectors
+    :param n: reduced dimension
+    :return: matching labels for each similarity metrics
+    """
+
+    # n is a parameter, desired reduced dimension
+    lda = LinearDiscriminantAnalysis(n_components=n)
     lda.fit(x_train, y_train)
+    # reduce feature vectors to n dimension
     train_reduced = lda.transform(x_train)
     test_reduced = lda.transform(x_test)
+
     y_predicted_1 = []
     y_predicted_2 = []
     y_predicted_3 = []
@@ -17,12 +31,13 @@ def run(x_train, y_train, x_test):
         opt2 = math.inf
         opt3 = math.inf
         for i in range(324):
+            # L1 distance
             val1 = np.sum(np.abs(train_reduced[i, :] - test_reduced[j, :]))
+            # L2 distance
             val2 = np.sum(np.power(train_reduced[i, :] - test_reduced[j, :], 2))
+            # Cosine Similarity
             train = train_reduced[i, :]
             test = test_reduced[j, :]
-            train.shape = (1, 107)
-            test.shape = (1, 107)
             val3 = 1 - cosine_similarity(train, test)
             if val1 < opt1:
                 opt1 = val1

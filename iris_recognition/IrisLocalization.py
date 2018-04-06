@@ -82,6 +82,7 @@ def outer_boundary(img, pupil, a, b):
     right = edges[row, col:]
     right = np.argmax(right == 255)
 
+
     # we might have no edges found along the center
     if (col - left - 2 > 15) and left != 0:
         edges[:, :(col - left - 2)] = 0
@@ -101,7 +102,7 @@ def outer_boundary(img, pupil, a, b):
     if circles is not None:
         # scale back
         circles = np.uint16(np.around(circles/0.3))
-        for i in circles[0,:]:
+        for i in circles[0, :]:
             return i[0], i[1], i[2]
     else:
         # manually fit a circle centered at the pupil circle with the average radius of outer bounds of eyes
