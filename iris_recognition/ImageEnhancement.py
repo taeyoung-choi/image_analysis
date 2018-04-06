@@ -1,5 +1,4 @@
 import cv2
-import matplotlib.pyplot as plt
 
 def run(img):
     """
@@ -21,7 +20,5 @@ def run(img):
             grid = img2[start_height:end_height, start_wid:end_wid]
             # Histogram Equalization
             img2[start_height:end_height, start_wid:end_wid] = cv2.equalizeHist(grid)
-    plt.imshow(img2, cmap="gray")
-    plt.savefig("plot/enhanced.png")
 
     return img2

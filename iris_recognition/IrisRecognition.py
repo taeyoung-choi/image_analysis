@@ -23,7 +23,6 @@ def get_train_feature():
                 eye_num, eye_num, j)
             img = cv2.imread(path, 0)
             feature = raw_img_process(img)
-            quit()
             x_train.append(feature)
             y_train.append(i)
     np.savetxt('csv/train_feature.csv', x_train, delimiter=',')
