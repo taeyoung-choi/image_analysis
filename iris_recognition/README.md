@@ -94,18 +94,64 @@ circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT,1,70,param1=20,param2=3,min
 ```
 
 ### IrisNormalization.py
-Dectected circles for the inner boundary and the outer boundary of an iris is usually not concentric.
-
-It first found the closest point from the pupil center to the outer boundary.
+Dectected circles for the inner boundary and the outer boundary of an iris is usually not concentric. 
+It calculates the closest point from the pupil center to the outer boundary.
 ```{python}
 r = int(round(out_r - np.hypot(in_col-out_col, in_row-out_row)))
 ```
-Since IrisLocalization is not perfect, we often find the outer boundary including the area out of the iris. In order to remove that noise, we draw another circle centered at the pupil center with the radius that we computed ealier. Then it normalizes the iris area to a rectangular image of size 64 by 512.
+This step might face two error cases.
+1. Outer boundary is wrongly defined.
+```{pyton}
+if r < in_r + 15:
+    r = 80
+```
+This happens when the inner circle and the outer circle are too close to each other. Then it manually assigns the radius of a nomalizing area.
+
+2. Outer boundary does not fit in the image.
+```{python}
+maxh, maxw = img.shape
+r2 = min(in_col, in_row, maxh-in_row, maxw-in_col)
+```
+It calculates the closest distance from the center to all image boundaries. After checking these errors, we finally define the region that we want to normalize.
+```{python}
+    r = min(r, r2)
+    max_r = r - in_r
+    M = 64
+    N = 512
+    normalized = []
+    for y in range(M):
+        row_pix = []
+        for x in range(N):
+            theta = float(2*np.pi*x/N)
+            hypotenuse = float(max_r*y/M) + in_r
+            col = int(round((np.cos(theta) * hypotenuse) + in_col))
+            row = int(round((np.sin(theta) * hypotenuse) + in_row))
+            row_pix.append(img[row,col])
+        normalized.append(row_pix)
+```
+Since IrisLocalization is not perfect, we often find the outer boundary including the area outside the iris. In order to remove that noise, we draw another circle centered at the pupil center with the radius that we computed ealier. Then it normalizes the iris area to a rectangular image of size 64 by 512.
 
 ### ImageEnhancement.py
 It divides the normalized image into 16 by 16 grids and equalizes the histogram of each grid.
+```{python}
+# do not change the original image
+img2 = img.copy()
+size = 16
+for i in range(4):
+    for j in range(32):
+        # Define each 16 by 16 grid iteratively
+        start_height = i*size
+        end_height = start_height+size
+        start_wid = j*size
+        end_wid = start_wid+size
+        grid = img2[start_height:end_height, start_wid:end_wid]
+        # Histogram Equalization
+        img2[start_height:end_height, start_wid:end_wid] = cv2.equalizeHist(grid)
+```
 
 ### FeatureExtraction.py
+
+
 #### spatial_filter
 Implementing the spatial filter defined in the paper.
 
