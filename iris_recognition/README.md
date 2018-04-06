@@ -281,7 +281,7 @@ The best performing distance metric is Cosine Similarity with the 0.72 recogniti
 ### Appendix
 #### Pupil Area Removal
 <p align="center">
-  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/left_right_remove.png">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/pupil_remove.png">
 </p>
 #### Top/Bottom Removal
 <p align="center">
@@ -297,10 +297,10 @@ The best performing distance metric is Cosine Similarity with the 0.72 recogniti
 </p>
 #### Normalized Image
 <p align="center">
-  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/fmr.png">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/normalized.png">
 </p>
 #### Enhanced Image
 <p align="center">
-  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/fmr.png">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/enhanced.png">
 </p>
 
