@@ -276,7 +276,7 @@ False Match and False Nonmatch Rates with Different Threshold Values
 | 0.7 | 0.23  | 0.09  |
 | 0.8 | 0.21  | 0.13  |
 
-The best performing distance metric is Cosine Similarity with the 0.72 recognition rate. I can improve the desing by more accurately capturing iris area. There are many manual assigning circles when fitted circles are erroneous.
+The best performing distance metric is Cosine Similarity with the 0.72 recognition rate. I can improve the desing by more accurately capturing iris area. There are many manual assigning circles when fitted circles are erroneous. I can further implement eyelid and eyelash detector to improve the performance of histogram equalization. As we can see in Appendix, the enhanced image shows a clear discontinuity between grids. We might want to enhance the image for the pixels that truly represents an iris.
 
 ### Appendix
 #### Pupil Area Removal
