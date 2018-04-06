@@ -5,16 +5,17 @@ The main function reads all the images and translate images into 2,044 feature v
 
 ### IrisLocalization.py
 
-#### def pupil_detection(img):
+#### def pupil_detection:
 Based on data, pixel values lower than 75 represents a pupil area. For some cases, the threshold includes some parts from eyelashes as noise in a binarized image. Therefore, we can easily remove the noise by running the follow code.
-```{python}
+```python
 kernel = np.ones((15,15), np.uint8)
 
-# MORPH_CLOSE is useful in closing small holes inside the foreground objects, or small black points on the object. (OpenCV 3.0.0-dev documentation)
+# MORPH_CLOSE is useful in closing small holes inside the foreground objects, 
+# or small black points on the object. (OpenCV 3.0.0-dev documentation)
 im_bw = cv2.morphologyEx(im_bw, cv2.MORPH_CLOSE, kernel)
 ```
 We can precisely calculate the origin and the radius of a pupil.
-```{python}
+```python
 # length: from 0 to 279
 length = np.array(range(len(im_bw)))
 # width: from 0 to 319
@@ -29,13 +30,13 @@ r = int(round((r1+r2)/4))
 ```
 It calculates the center of a pupil by getting pixel coordinates and computing the mean. The radius is the average of the vertical length and the horizontal length from the center. Finally, it returns the center and the radius of a pupil.
 
-#### def outer boundary(img, pupil, a, b):
+#### def outer boundary:
 It resizes a image by 30% in order to speed up the computation. After downsizing the image, it applies blurring and the Canny edge detector.
-```{python}
+```python
 edges = cv2.Canny(resized_image, a, b)
 ```
 It removes the pupil area to remove noise created from eyelashes and the pupil edge. It turns out that removing a circular area centered at the pupil center with the radius of 12 pixels greater than the pupil radius works well for our purposes.
-```{python}
+```python
 n, m = edges.shape
 # r is the radius of a pupil
 r1 = r + 12
@@ -44,7 +45,7 @@ mask = x1*x1 + y1*y1 <= r1*r1
 edges[mask] = 0
 ```
 Then it subsequently removes unnecessary edges detected outside of the eye area. 
-```{python}
+```python
 # trying to locate first edge found below the eye
 lower_removal = edges[row+r+8:, col]
 l_bound = np.argmax(lower_removal == 255)+row+r+8
@@ -80,7 +81,7 @@ else:
 ```
 
 After removing noise, it applies Hough transformation to fit a circle for the outer boundary of a pupil. If circles cannot be found, we manually fit a circle centered at the pupil circle with the average radius of outer bounds of eyes in the dataset.
-```{python}
+```python
 circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT,1,70,param1=20,param2=3,minRadius=30,maxRadius=35)
     if circles is not None:
         circles = np.uint16(np.around(circles/0.3))
@@ -96,24 +97,24 @@ circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT,1,70,param1=20,param2=3,min
 ### IrisNormalization.py
 Dectected circles for the inner boundary and the outer boundary of an iris is usually not concentric. 
 It calculates the closest point from the pupil center to the outer boundary.
-```{python}
+```python
 r = int(round(out_r - np.hypot(in_col-out_col, in_row-out_row)))
 ```
 This step might face two error cases.
 1. Outer boundary is wrongly defined.
-```{pyton}
+```pyton
 if r < in_r + 15:
     r = 80
 ```
 This happens when the inner circle and the outer circle are too close to each other. Then it manually assigns the radius of a nomalizing area.
 
 2. Outer boundary does not fit in the image.
-```{python}
+```python
 maxh, maxw = img.shape
 r2 = min(in_col, in_row, maxh-in_row, maxw-in_col)
 ```
 It calculates the closest distance from the center to all image boundaries. After checking these errors, we finally define the region that we want to normalize.
-```{python}
+```python
     r = min(r, r2)
     max_r = r - in_r
     M = 64
@@ -133,7 +134,7 @@ Since IrisLocalization is not perfect, we often find the outer boundary includin
 
 ### ImageEnhancement.py
 It divides the normalized image into 16 by 16 grids and equalizes the histogram of each grid.
-```{python}
+```python
 # do not change the original image
 img2 = img.copy()
 size = 16
@@ -151,12 +152,72 @@ for i in range(4):
 
 ### FeatureExtraction.py
 
+#### def spatial_filter:
 
-#### spatial_filter
-Implementing the spatial filter defined in the paper.
+This function implements the spatial filter defined in the paper.
+```python
+:param x: x-coordinate
+:param y: y-coordinate
+:param delta_x: space constants of the Gaussian envelope along the x axis
+:param delta_y: space constants of the Gaussian envelope along the y axis
+:param f: frequency of the sinusoidal function
 
-#### to_feature_vec
-It uses 7 by 7 region. So that all the pixels are equally distributed from a given point. Therefore, it uses the subset of image of the size 49 by 511. As a result, each feature vector has the dimension of 2,044 (7*73*4). 
+modul_fun = np.cos(2*np.pi*f*np.hypot(x, y))
+gaus_envelop = (x**2)/(delta_x**2)+(y**2)/(delta_y**2)
+spatia_filter = 1/(2*np.pi*delta_x*delta_y)*np.exp(-0.5*gaus_envelop)*modul_fun
+```
+
+#### def to_feature_vec:
+
+We are looking at the subset of an image of the size 42 by 511. The paper uses the subset of the size 49 by 512. However, my iris localization includes more eyelid than paper's implementation. So this function uses a smaller region of the original image. Furthermore, it uses 7 by 7 region. So that all the pixels are equally distributed from a given point. Therfore, the dimensions of a selected region are multiples of 7. 
+```python
+for i in range(len):
+    for j in range(wid):
+        each_pix1 = 0
+        each_pix2 = 0
+        for m in range(i-each_side, i+each_side+1):
+            for n in range(j-each_side, j+each_side+1):
+                # Around the boundaries of the image, it applies the zero-padding.
+                if (0 < m < len) and (0 < n < wid):
+                    each_pix1 += roi[m, n]*spatial_filter(i-m, j-n, 3, 1.5, 1/1.5)
+                    each_pix2 += roi[m, n]*spatial_filter(i-m, j-n, 4.5, 1.5, 1/1.5)
+        channel1[i, j] = each_pix1
+        channel2[i, j] = each_pix2
+```
+
+The final step is to calculate the mean and the average absolute deviation of each 7 by 7 filtered block.
+```python
+for i in range(int(len/block_size)):
+    for j in range(int(wid/block_size)):
+            # Define each 7 by 7 filtered block iteratively
+            start_height = i*block_size
+            end_height = start_height+block_size
+            start_wid = j*block_size
+            end_wid = start_wid+block_size
+            grid1 = channel1[start_height:end_height, start_wid:end_wid]
+            grid2 = channel2[start_height:end_height, start_wid:end_wid]
+
+            # Channel 1
+            absolute = np.absolute(grid1)
+            # mean
+            mean = np.mean(absolute)
+            feature_vec.append(mean)
+            # absolute deviation
+            std = np.mean(np.absolute(absolute-mean))
+            feature_vec.append(std)
+
+            # Channel 2
+            absolute = np.absolute(grid2)
+            # mean
+            mean = np.mean(absolute)
+            feature_vec.append(mean)
+            # absolute deviation
+            std = np.mean(np.absolute(absolute-mean))
+            feature_vec.append(std)
+```
+As a result, each feature vector has the dimension of 1,752 (6\*73\*4). 
+
+
 
 ### IrisMatching.py
 Fit Sklearn LinearDiscriminantAnalysis on the feature vectors. In order to use the distance metrics provided in the paper, it transforms the feature vector into the appropriate dimension, then predicts the result.
