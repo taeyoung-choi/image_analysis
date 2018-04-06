@@ -166,6 +166,7 @@ modul_fun = np.cos(2*np.pi*f*np.hypot(x, y))
 gaus_envelop = (x**2)/(delta_x**2)+(y**2)/(delta_y**2)
 spatia_filter = 1/(2*np.pi*delta_x*delta_y)*np.exp(-0.5*gaus_envelop)*modul_fun
 ```
+![Sample Service2](plot/apatial_filter.png)
 
 #### def to_feature_vec:
 
