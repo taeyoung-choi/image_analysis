@@ -154,7 +154,7 @@ for i in range(4):
 
 #### def spatial_filter:
 
-This function implements the spatial filter defined in the paper.
+This function implements the spatial filter defined in the paper using M<sub>1<sub>.
 ```python
 :param x: x-coordinate
 :param y: y-coordinate
@@ -166,6 +166,10 @@ modul_fun = np.cos(2*np.pi*f*np.hypot(x, y))
 gaus_envelop = (x**2)/(delta_x**2)+(y**2)/(delta_y**2)
 spatia_filter = 1/(2*np.pi*delta_x*delta_y)*np.exp(-0.5*gaus_envelop)*modul_fun
 ```
+
+<p align="center">
+  <img width="450" height="150" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/spatial_filter.png">
+</p>
 
 #### def to_feature_vec:
 
@@ -220,12 +224,34 @@ As a result, each feature vector has the dimension of 1,752 (6\*73\*4).
 
 
 ### IrisMatching.py
-Fit Sklearn LinearDiscriminantAnalysis on the feature vectors. In order to use the distance metrics provided in the paper, it transforms the feature vector into the appropriate dimension, then predicts the result.
+Fit Sklearn LinearDiscriminantAnalysis on the feature vectors. In order to use the distance metrics provided in the paper, it transforms the feature vector into the appropriate dimension, then predicts the result using three different similarity metrics.
+```python
+# n is a parameter, desired reduced dimension
+lda = LinearDiscriminantAnalysis(n_components=n)
+lda.fit(x_train, y_train)
+# reduce feature vectors to n dimension
+train_reduced = lda.transform(x_train)
+test_reduced = lda.transform(x_test)
+```
+The similarity metrics are defined as follows:
+```python
+# for each j, we are iterating through i from 0 to 324 (indices of training images)
+# L1 distance
+val1 = np.sum(np.abs(train_reduced[i, :] - test_reduced[j, :]))
+# L2 distance
+val2 = np.sum(np.power(train_reduced[i, :] - test_reduced[j, :], 2))
+# Cosine Similarity
+train = train_reduced[i, :]
+test = test_reduced[j, :]
+val3 = 1 - cosine_similarity(train, test)
+```
 
 ### PerformanceEvaluation.py
-Performance is evaluated by three different distance measures and dimensionality reduction in LDA. Three metrics are L<sub>1, L<sub>2 and Cosine Similarity. It checks all the metrics over all possible dimensionality reduction domain.
+Performance is evaluated by three different distance measures and dimensionality reduction in LDA. Three metrics are L<sub>1</sub>, L<sub>2</sub> and Cosine Similarity. It checks all the metrics over all possible dimensionality reduction domain.
 
-![Sample Service2](temp.png)
+<p align="center">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/acc.png">
+</p>
 
 Recognition Results Using Different Similarity Measures
 
@@ -234,8 +260,10 @@ Recognition Results Using Different Similarity Measures
 | L<sub>1 | 0.48 | 0.50 | 0.48| 0.46 |
 | L<sub>2 | 0.51  | 0.54| 0.52 | 0.51 | 
 | Cosine | 0.65 | 0.69 |0.71| 0.72 |
-    
-![Sample Service2](fmr.png)
+
+<p align="center">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/fmr.png">
+</p>
 
 LDA can calculate the probability of each point being associated with each class. Instead of picking the class with the highest probability, it rejects the matching if the probability is lower than the threshold. Then it calculates False match rate and False non-match rate.
 
@@ -248,4 +276,4 @@ False Match and False Nonmatch Rates with Different Threshold Values
 | 0.7 | 0.23  | 0.09  |
 | 0.8 | 0.21  | 0.13  |
 
-The best performing distance metric is Cosine Similarity with the 0.72 recognition rate. I can improve the desing by more accurately capturing iris area. I noticed that there are many iris images that contains significant amount of eyelids. The paper only uses upper 48 pixels, but even doing so cannot remove eyelids for my localization algorithm. I should test with different dimensions of nomalization images, in order to improve the recognition rate.
+The best performing distance metric is Cosine Similarity with the 0.72 recognition rate. I can improve the desing by more accurately capturing iris area. There are many manual assigning circles when fitted circles are erroneous.
