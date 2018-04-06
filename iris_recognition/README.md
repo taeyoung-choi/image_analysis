@@ -247,7 +247,7 @@ val3 = 1 - cosine_similarity(train, test)
 ```
 
 ### PerformanceEvaluation.py
-Performance is evaluated by three different distance measures and dimensionality reduction in LDA. Three metrics are L<sub>1<sub>, L<sub>2<sub> and Cosine Similarity. It checks all the metrics over all possible dimensionality reduction domain.
+Performance is evaluated by three different distance measures and dimensionality reduction in LDA. Three metrics are L<sub>1</sub>, L<sub>2</sub> and Cosine Similarity. It checks all the metrics over all possible dimensionality reduction domain.
 
 <p align="center">
   <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/acc.png">
