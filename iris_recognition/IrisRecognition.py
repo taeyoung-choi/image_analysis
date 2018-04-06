@@ -25,8 +25,8 @@ def get_train_feature():
             feature = raw_img_process(img)
             x_train.append(feature)
             y_train.append(i)
-    np.savetxt('train_feature.csv', x_train, delimiter=',')
-    np.savetxt('train_label.csv', y_train, delimiter=',')
+    np.savetxt('csv/train_feature.csv', x_train, delimiter=',')
+    np.savetxt('csv/train_label.csv', y_train, delimiter=',')
 
     return np.array(x_train), np.array(y_train)
 
@@ -44,8 +44,8 @@ def get_test_feature():
             feature = raw_img_process(img)
             x_test.append(feature)
             y_test.append(i)
-    np.savetxt('test_feature.csv', x_test, delimiter=',')
-    np.savetxt('test_label.csv', y_test, delimiter=',')
+    np.savetxt('csv/test_feature.csv', x_test, delimiter=',')
+    np.savetxt('csv/test_label.csv', y_test, delimiter=',')
 
     return np.array(x_test), np.array(y_test)
 
@@ -53,10 +53,15 @@ def get_test_feature():
 def main():
     # x_train, y_train = get_train_feature()
     # x_test, y_test = get_test_feature()
-    x_test = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image Analysis/iris_recognition/test_feature.csv',delimiter=',')
-    y_test = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image Analysis/iris_recognition/test_label.csv',delimiter=',')
-    x_train = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image Analysis/iris_recognition/train_feature.csv',delimiter=',')
-    y_train = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image Analysis/iris_recognition/train_label.csv',delimiter=',')
+    x_test = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
+                        'Analysis/iris_recognition/csv/test_feature.csv',delimiter=',')
+    y_test = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
+                        'Analysis/iris_recognition/csv/test_label.csv',
+                        delimiter=',')
+    x_train = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
+                         'Analysis/iris_recognition/csv/train_feature.csv',delimiter=',')
+    y_train = np.loadtxt('/Users/taeyoungchoi/Documents/Spring 2018/Image '
+                         'Analysis/iris_recognition/csv/train_label.csv',delimiter=',')
     PerformanceEvaluation.rec_rate_by_dimesion(x_train, y_train, x_test, y_test)
     PerformanceEvaluation.fmr(x_train, y_train, x_test, y_test)
 
