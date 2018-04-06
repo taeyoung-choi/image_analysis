@@ -277,3 +277,30 @@ False Match and False Nonmatch Rates with Different Threshold Values
 | 0.8 | 0.21  | 0.13  |
 
 The best performing distance metric is Cosine Similarity with the 0.72 recognition rate. I can improve the desing by more accurately capturing iris area. There are many manual assigning circles when fitted circles are erroneous.
+
+### Appendix
+#### Pupil Area Removal
+<p align="center">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/left_right_remove.png">
+</p>
+#### Top/Bottom Removal
+<p align="center">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/top_bot_remove.png">
+</p>
+#### Left/Right Removal
+<p align="center">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/left_right_remove.png">
+</p>
+#### Boundaries Detected
+<p align="center">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/detected.png">
+</p>
+#### Normalized Image
+<p align="center">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/fmr.png">
+</p>
+#### Enhanced Image
+<p align="center">
+  <img width="460" height="300" src="https://github.com/taeyoung-choi/image_analysis/blob/master/iris_recognition/plot/fmr.png">
+</p>
+
