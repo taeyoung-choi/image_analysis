@@ -1,7 +1,7 @@
 
 ### IrisRecognition.py
 
-The main function reads all the images and translate images into 2,044 feature vectors. It also generates plots for Iris recognition rate by different dimensions in LDA and false match rates against fasle non-match rates for different thresholds.
+The main function reads all the images and translate images into 1,752 feature vectors. It also generates plots for Iris recognition rate by different dimensions in LDA and false match rates against fasle non-match rates for different thresholds.
 
 ### IrisLocalization.py
 
